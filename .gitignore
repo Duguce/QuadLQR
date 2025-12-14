@@ -1,0 +1,17 @@
+# Python virtual environments
+.env
+.venv
+*.egg-info/
+
+# Byte-compiled / optimized / DLL files
+.ruff_cache/
+.pytest_cache/
+__pycache__/
+
+# JSON files
+*.json
+*.jsonl
+
+# output directories
+figs/
+logs/
