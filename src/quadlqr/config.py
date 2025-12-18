@@ -35,42 +35,42 @@ class Limits:
     omega_min: float = 0.0
     thrust_min: float = 0.0
     thrust_max: float = 1.2  # N  (mg ~ 0.363N)
-    tau_max: float = 0.03  # N*m
+    tau_max: float = 0.05  # N*m
 
 
 @dataclass
 class DisturbanceConfig:
     """Bounded force (world) and torque (body) disturbances."""
 
-    level: int = 1  # 0 none, 1 medium, 2 strong
+    level: int = 0  # 0 none, 1 medium, 2 strong
     seed: int = 7
 
     # Force disturbance amps (N)
-    force_amp_1: np.ndarray = np.array([0.05, 0.05, 0.04])
-    force_amp_2: np.ndarray = np.array([0.10, 0.10, 0.08])
+    force_amp_1: np.ndarray = np.array([0.03, 0.03, 0.025])
+    force_amp_2: np.ndarray = np.array([0.08, 0.08, 0.07])
     force_freq_hz: np.ndarray = np.array([0.7, 0.9, 0.5])
-    force_noise_sigma_1: float = 0.01
-    force_noise_sigma_2: float = 0.02
+    force_noise_sigma_1: float = 0.006
+    force_noise_sigma_2: float = 0.015
 
     # Torque disturbance amps (N*m)
-    tau_amp_1: np.ndarray = np.array([0.002, 0.002, 0.0015])
-    tau_amp_2: np.ndarray = np.array([0.004, 0.004, 0.003])
+    tau_amp_1: np.ndarray = np.array([0.0015, 0.0015, 0.0012])
+    tau_amp_2: np.ndarray = np.array([0.0035, 0.0035, 0.0026])
     tau_freq_hz: np.ndarray = np.array([1.2, 1.0, 0.8])
-    tau_noise_sigma_1: float = 0.0004
-    tau_noise_sigma_2: float = 0.0008
+    tau_noise_sigma_1: float = 0.0003
+    tau_noise_sigma_2: float = 0.0007
 
 
 @dataclass
 class LQRConfig:
     # Outer loop: x=[ep(3), ev(3)], u=a_cmd(3)
-    Qo_pos: float = 60.0
-    Qo_vel: float = 12.0
-    Ro_acc: float = 2.0
+    Qo_pos: float = 24.0
+    Qo_vel: float = 8.0
+    Ro_acc: float = 6.0
 
     # Inner loop (SO(3) small error): x=[e_R(3), e_w(3)], u=tau(3)
-    Qi_R: float = 140.0
-    Qi_w: float = 12.0
-    Ri_tau: float = 0.6
+    Qi_R: float = 80.0
+    Qi_w: float = 10.0
+    Ri_tau: float = 1.5
 
     yaw_track: bool = False
     yaw_des: float = 0.0
@@ -79,14 +79,14 @@ class LQRConfig:
 @dataclass
 class PIDConfig:
     # Outer position PID -> desired acceleration
-    kp_pos: np.ndarray = np.array([2.5, 2.5, 4.0])
-    ki_pos: np.ndarray = np.array([0.05, 0.05, 0.08])
-    kd_pos: np.ndarray = np.array([2.0, 2.0, 2.6])
-    integ_limit: float = 2.0
+    kp_pos: np.ndarray = np.array([2.2, 2.2, 3.5])
+    ki_pos: np.ndarray = np.array([0.04, 0.04, 0.06])
+    kd_pos: np.ndarray = np.array([1.6, 1.6, 2.2])
+    integ_limit: float = 1.8
 
     # Inner attitude PD -> desired torque (uses SO(3) error vector)
-    kp_R: np.ndarray = np.array([0.10, 0.10, 0.08])
-    kd_w: np.ndarray = np.array([0.02, 0.02, 0.015])
+    kp_R: np.ndarray = np.array([0.09, 0.09, 0.07])
+    kd_w: np.ndarray = np.array([0.018, 0.018, 0.014])
 
 
 @dataclass

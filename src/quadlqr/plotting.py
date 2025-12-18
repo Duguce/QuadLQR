@@ -89,3 +89,55 @@ def plot_motor_speeds(npz: dict, outdir: str, tag: str) -> str:
     fig.savefig(path, dpi=200)
     plt.close(fig)
     return path
+
+
+def plot_traj_xy_compare(
+    npz_lqr: dict,
+    npz_pid: dict,
+    outdir: str,
+    tag: str,
+    title: str = "Circle Tracking Comparison (XY)",
+) -> str:
+    """Plot reference, LQR actual, and PID actual trajectories on the same XY figure."""
+    _ensure_dir(outdir)
+
+    # Reference (should be identical in both npz)
+    p_ref = npz_lqr["p_ref"]
+
+    # Actual trajectories
+    X_lqr = npz_lqr["X"]
+    X_pid = npz_pid["X"]
+
+    fig = plt.figure()
+    plt.plot(
+        p_ref[:, 0],
+        p_ref[:, 1],
+        "k--",
+        linewidth=2.0,
+        label="Reference",
+    )
+    plt.plot(
+        X_lqr[:, 0],
+        X_lqr[:, 1],
+        linewidth=2.0,
+        label="LQR",
+    )
+    plt.plot(
+        X_pid[:, 0],
+        X_pid[:, 1],
+        linewidth=2.0,
+        label="PID",
+    )
+
+    plt.xlabel("x (m)")
+    plt.ylabel("y (m)")
+    plt.title(title)
+    plt.axis("equal")
+    plt.legend()
+    fig.tight_layout()
+
+    path = os.path.join(outdir, f"Fig_TrajXY_Compare__{tag}.png")
+    fig.savefig(path, dpi=300)
+    plt.close(fig)
+
+    return path

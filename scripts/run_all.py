@@ -16,7 +16,7 @@ from quadlqr.plotting import (
 )
 from quadlqr.sim.runner import run_case
 from quadlqr.sim.scenarios import circle, hover, line
-
+from quadlqr.plotting import plot_traj_xy_compare
 
 def main() -> None:
     cfg = ExperimentConfig()
@@ -47,21 +47,30 @@ def main() -> None:
 
     # Exp-3 Circle (LQR)
     p3 = run_case(cfg, "Exp3_Circle", circle, "lqr", cfg.sim.t_circle, outdir)
-    npz = np.load(p3)
-    rows.append({"exp": "Exp3_Circle", "controller": "LQR", **compute_metrics(npz)})
-    plot_traj_xy(npz, figdir, "Exp3_Circle__LQR", "Circle Tracking (XY)")
-    plot_inputs(npz, figdir, "Exp3_Circle__LQR")
-    plot_motor_speeds(npz, figdir, "Exp3_Circle__LQR")
+    npz_lqr = np.load(p3)
+    rows.append({"exp": "Exp3_Circle", "controller": "LQR", **compute_metrics(npz_lqr)})
+    plot_traj_xy(npz_lqr, figdir, "Exp3_Circle__LQR", "Circle Tracking (XY)")
+    plot_inputs(npz_lqr, figdir, "Exp3_Circle__LQR")
+    plot_motor_speeds(npz_lqr, figdir, "Exp3_Circle__LQR")
 
     # Exp-4 Circle Compare (PID baseline)
     p4 = run_case(cfg, "Exp4_CircleCompare", circle, "pid", cfg.sim.t_circle, outdir)
-    npz = np.load(p4)
+    npz_pid = np.load(p4)
     rows.append(
-        {"exp": "Exp4_CircleCompare", "controller": "PID", **compute_metrics(npz)}
+        {"exp": "Exp4_CircleCompare", "controller": "PID", **compute_metrics(npz_pid)}
     )
-    plot_traj_xy(npz, figdir, "Exp4_Circle__PID", "Circle Tracking (XY) - PID")
-    plot_inputs(npz, figdir, "Exp4_Circle__PID")
-    plot_motor_speeds(npz, figdir, "Exp4_Circle__PID")
+    plot_traj_xy(npz_pid, figdir, "Exp4_Circle__PID", "Circle Tracking (XY) - PID")
+    plot_inputs(npz_pid, figdir, "Exp4_Circle__PID")
+    plot_motor_speeds(npz_pid, figdir, "Exp4_Circle__PID")
+
+    # LQR vs PID comparison
+    plot_traj_xy_compare(
+        npz_lqr=npz_lqr,
+        npz_pid=npz_pid,
+        outdir=figdir,
+        tag="Circle_LQR_vs_PID",
+        title="Circle Tracking (XY): LQR vs PID",
+    )
 
     # Save metrics
     with open(os.path.join(outdir, "metrics.json"), "w", encoding="utf-8") as f:
