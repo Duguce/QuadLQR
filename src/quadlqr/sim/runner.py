@@ -39,6 +39,7 @@ def run_case(
 
     lqr = HierarchicalLQR.build(cfg.quad, cfg.lqr, cfg.limits)
     pid = BaselinePID.build(cfg.quad, cfg.pid, cfg.limits)
+    lqr.reset()
     pid.reset()
 
     dt = cfg.sim.dt
@@ -76,7 +77,7 @@ def run_case(
         }
 
         if controller.lower() == "lqr":
-            wrench = lqr.compute(st, ref_dict)
+            wrench = lqr.compute(st, ref_dict, dt)
         elif controller.lower() == "pid":
             wrench = pid.compute(st, ref_dict, dt)
         else:
@@ -109,7 +110,7 @@ def run_case(
 
         # compute controller output for logging
         if controller.lower() == "lqr":
-            wrench = lqr.compute(st, ref_dict)
+            wrench = lqr.compute(st, ref_dict, dt)
         else:
             wrench = pid.compute(st, ref_dict, dt)
         omega_cmd = mixer.allocate(wrench.thrust, wrench.tau)

@@ -30,6 +30,7 @@ class HierarchicalLQR:
     limits: Limits
     K_outer: np.ndarray
     K_inner: np.ndarray
+    integ_ep: np.ndarray
 
     @staticmethod
     def build(quad: QuadParams, cfg: LQRConfig, limits: Limits) -> "HierarchicalLQR":
@@ -70,10 +71,18 @@ class HierarchicalLQR:
         Ki = lqr_gain(Ai, Bi, Qi, Ri)
 
         return HierarchicalLQR(
-            quad=quad, cfg=cfg, limits=limits, K_outer=Ko, K_inner=Ki
+            quad=quad,
+            cfg=cfg,
+            limits=limits,
+            K_outer=Ko,
+            K_inner=Ki,
+            integ_ep=np.zeros(3, dtype=float),
         )
 
-    def compute(self, st: State, ref: dict) -> Wrench:
+    def reset(self) -> None:
+        self.integ_ep[:] = 0.0
+
+    def compute(self, st: State, ref: dict, dt: float | None = None) -> Wrench:
         p, v, q, w = st.p, st.v, q_normalize(st.q), st.omega
         p_d = np.asarray(ref["p_d"], dtype=float).reshape(3)
         v_d = np.asarray(ref.get("v_d", np.zeros(3)), dtype=float).reshape(3)
@@ -88,6 +97,16 @@ class HierarchicalLQR:
         ev = v - v_d
         xo = np.concatenate([ep, ev], axis=0)
         a_cmd = a_ff - self.K_outer @ xo
+
+        if self.cfg.use_pos_integral and dt is not None and dt > 0.0:
+            self.integ_ep += ep * dt
+            np.clip(
+                self.integ_ep,
+                -self.cfg.integ_limit,
+                self.cfg.integ_limit,
+                out=self.integ_ep,
+            )
+            a_cmd -= self.cfg.ki_pos * self.integ_ep
 
         # Map to desired attitude + thrust
         q_d, thrust = accel_to_q_and_thrust(a_cmd, yaw_d, self.quad.m, self.quad.g)

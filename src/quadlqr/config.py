@@ -74,6 +74,9 @@ class LQRConfig:
 
     yaw_track: bool = False
     yaw_des: float = 0.0
+    use_pos_integral: bool = True
+    ki_pos: np.ndarray = np.array([0.6, 0.6, 0.8])
+    integ_limit: float = 0.6
 
 
 @dataclass
